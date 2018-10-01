@@ -12,18 +12,17 @@ import json
 
 errors = open("errors.txt", "w", encoding="utf-8")
 
-#data = pd.read_csv('/home/lapotre/articles_blog/inriaviz/sampleSPath.csv')
-#data = pd.read_csv('sampleSPath.csv')
+# data = pd.read_csv('/home/lapotre/articles_blog/inriaviz/sampleSPath.csv')
+# data = pd.read_csv('sampleSPath.csv')
 data = pd.read_csv('test.csv')
 
 sparql = SPARQLWrapper("http://data.bnf.fr/sparql")
 
 
 def query(entrydict, jointlevelkey, minus, number, uri=""):      
-    for i in range(len(pd.DataFrame(entrydict)[jointlevelkey].dropna())) :
-        if pd.DataFrame(entrydict)[jointlevelkey].dropna()[i]['type'] == 'uri' : 
+    for i in range(len(pd.DataFrame(entrydict)[jointlevelkey].dropna())):
+        if pd.DataFrame(entrydict)[jointlevelkey].dropna()[i]['type'] == 'uri': 
             sparql_query = """
-
                         SELECT distinct *
                         WHERE
                         {
@@ -52,37 +51,34 @@ def uri2extract(uri):
                     {
                     <%s> ?lien01 ?level1.                
                     }               
-                """%uri)
+                """ %uri)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
     local_dict[uri] = results['results']['bindings']
-    list_df = []
-    
     
     query(local_dict[uri], 'level1', '1', '2', uri)
     
     for e in range(len(local_dict[uri])) :
         if ("children" in local_dict[uri][e]
-            and len(local_dict[uri][e]['children']) > 0) :
+            and len(local_dict[uri][e]['children']) > 0):
             query(local_dict[uri][e]['children'], 'level2', '2', '3', uri)
             for f in range(len(local_dict[uri][e]['children'])):
                 if ("children" in local_dict[uri][e]['children'][f]
                     and
-                    len(local_dict[uri][e]['children'][f]['children']) > 0) :
+                    len(local_dict[uri][e]['children'][f]['children']) > 0):
                     query(local_dict[uri][e]['children'][f]['children'], 'level3', '3', '4', uri)
                     for g in range(len(local_dict[uri][e]['children'][f]['children'])):
                         if ("children" in local_dict[uri][e]['children'][f]['children'][g]
                             and
-                            len(local_dict[uri][e]['children'][f]['children'][g]['children']) > 0) :
+                            len(local_dict[uri][e]['children'][f]['children'][g]['children']) > 0):
                             query(local_dict[uri][e]['children'][f]['children'][g]['children'], 'level4', '4', '5', uri)
                             for h in range(len(local_dict[uri][e]['children'][f]['children'][g]['children'])):
                                 if ("children" in local_dict[uri][e]['children'][f]['children'][g]['children'][h]
                                     and
-                                    len(local_dict[uri][e]['children'][f]['children'][g]['children'][h]['children']) > 0) :
+                                    len(local_dict[uri][e]['children'][f]['children'][g]['children'][h]['children']) > 0):
                                     query(local_dict[uri][e]['children'][f]['children'][g]['children'][h]['children'], 'level5', '5', '6', uri)
-
-
+    return local_dict[uri]
 
 def liste2split(data, i):
     report_name = f'sampleSPath{str(i)}.json'
