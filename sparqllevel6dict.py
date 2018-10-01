@@ -100,7 +100,7 @@ def liste2split(data, i):
         liste2split(data[split_param:], i+1)
     
 
-split_param = 2
+split_param = 50
 
 if __name__ == "__main__":
     i = 1
