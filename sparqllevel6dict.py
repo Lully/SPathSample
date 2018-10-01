@@ -13,8 +13,8 @@ import json
 errors = open("errors.txt", "w", encoding="utf-8")
 
 # data = pd.read_csv('/home/lapotre/articles_blog/inriaviz/sampleSPath.csv')
-# data = pd.read_csv('sampleSPath.csv')
-data = pd.read_csv('test.csv')
+data = pd.read_csv('sampleSPath.csv')
+# data = pd.read_csv('test.csv')
 
 sparql = SPARQLWrapper("http://data.bnf.fr/sparql")
 
