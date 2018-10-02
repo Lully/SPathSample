@@ -8,6 +8,7 @@ from zipfile import ZipFile
 from os import remove
 import pandas as pd
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
+import urllib.error
 import json
 
 errors = open("errors.txt", "w", encoding="utf-8")
@@ -37,7 +38,11 @@ def query(entrydict, jointlevelkey, minus, number, uri=""):
                 entrydict[i]['children'] = results['results']['bindings']
                 print("query", i, uri, "\n", entrydict[i]['children'], "\n")
             except SPARQLExceptions.EndPointNotFound as err:
-                errors.write(sparql_query + "\n\n")
+                errors.write(sparql_query + "\n" + str(err) + "\n\n")
+            except urllib.error.URLError as err:
+                errors.write(sparql_query + "\n" + str(err) + "\n\n")
+            except urllib.error.HTTPError as err:
+                errors.write(sparql_query + "\n" + str(err) + "\n\n")
         else :
             entrydict[i]['children'] = []
         
@@ -93,7 +98,7 @@ def liste2split(data, i):
     dump = json.dumps(dict_report)
     o.write(dump)
     o.close()
-    with ZipFile(f'{report_name[:-5]+".zip"}', 'w') as myzip:
+    with ZipFile(f'{report_name[:-5]+".zip"}', 'w', compresslevel=9) as myzip:
         myzip.write(report_name)
     remove(report_name)
     if (len(data) > split_param):
@@ -103,8 +108,8 @@ def liste2split(data, i):
 split_param = 50
 
 if __name__ == "__main__":
-    i = 1
-    liste2split(data, i)
+    i = 4
+    liste2split(data[150:], i)
 
 
 
