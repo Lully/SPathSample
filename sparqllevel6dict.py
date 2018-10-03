@@ -65,6 +65,8 @@ def url_nt2report(url_nt, report, level):
                     url_nt2report(url_nt_object, report, level+1)
     except urllib.error.HTTPError as err:
         errors.write(url_nt + "\n" + str(err) + "\n\n")
+    except rdflib.plugins.parsers.ntriples.ParseError as err:
+        errors.write(url_nt + "\n" + str(err) + "\n\n")
 
 def liste2split(data, i):
     j = 0
