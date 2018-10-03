@@ -85,7 +85,7 @@ def liste2split(data, i):
             if (url_nt is not None):
                 url_nt2report(url_nt, report, 1)
     report.close()
-    with ZipFile(f'{report_name[:-5]+".zip"}', 'w') as myzip:
+    with ZipFile(f'{report_name[:-3]+".zip"}', 'w') as myzip:
         myzip.write(report_name)
     remove(report_name)
     if (len(data) > split_param):
