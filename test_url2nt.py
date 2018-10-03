@@ -22,9 +22,10 @@ def uri2url_nt(uri):
     afin de pouvoir construire l'URL du fichier .nt
     """
     request = html.parse(urllib.request.urlopen(uri))
-    url_ref = request.find("//meta[@property='og:url']").get("content")
-    url_nt = url_ref + "rdf.nt"
-    url_nt = url_nt.replace("/fr/", "/")
+    try:
+        url_nt = request.find("//a[@id='download-rdf-nt']").get("href")
+    except AttributeError:
+        url_nt = None
     return url_nt
 
 
@@ -49,7 +50,8 @@ def url_nt2report(url_nt, report, level):
         for object in objects:
             print("object", object)
             url_nt_object = uri2url_nt(object)
-            url_nt2report(url_nt_object, report, level+1)
+            if (url_nt_object is not None):
+                url_nt2report(url_nt_object, report, level+1)
 
 report = open("report_test.txt", "w", encoding="utf-8")
 url_nt2report("http://data.bnf.fr/12138677/bengt_emil_johnson/rdf.nt",
