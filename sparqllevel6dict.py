@@ -18,7 +18,7 @@ errors = open("errors2.txt", "w", encoding="utf-8")
 
 # data = pd.read_csv('/home/lapotre/articles_blog/inriaviz/sampleSPath.csv')
 all_data = pd.read_csv('sampleSPath.csv')
- 
+
 sparql = SPARQLWrapper("http://data.bnf.fr/sparql")
 
 # Liste des URI déjà traitées
@@ -30,11 +30,19 @@ def uri2url_nt(uri):
     Ouvre l'URI et suit la redirection pour avoir l'URL de la page
     afin de pouvoir construire l'URL du fichier .nt
     """
-    request = html.parse(urllib.request.urlopen(uri))
+    test = True
+    url_nt = None
     try:
-        url_nt = request.find("//a[@id='download-rdf-nt']").get("href")
-    except AttributeError:
-        url_nt = None
+        request = html.parse(urllib.request.urlopen(uri))
+    except TimeoutError as err:
+        test = False
+    except urllib.error.URLError as err:
+        test = False
+    if test:
+        try:
+            url_nt = request.find("//a[@id='download-rdf-nt']").get("href")
+        except AttributeError:
+            pass
     return url_nt
 
 
@@ -63,9 +71,13 @@ def url_nt2report(url_nt, report, level):
                 url_nt_object = uri2url_nt(object)
                 if (url_nt_object is not None):
                     url_nt2report(url_nt_object, report, level+1)
+    except urllib.error.URLError as err:
+        errors.write(url_nt + "\n" + str(err) + "\n\n")
     except urllib.error.HTTPError as err:
         errors.write(url_nt + "\n" + str(err) + "\n\n")
     except rdflib.plugins.parsers.ntriples.ParseError as err:
+        errors.write(url_nt + "\n" + str(err) + "\n\n")
+    except TimeoutError as err:
         errors.write(url_nt + "\n" + str(err) + "\n\n")
 
 def liste2split(data, i):
@@ -91,11 +103,11 @@ def liste2split(data, i):
     if (len(data) > split_param):
         liste2split(data[split_param:], i+1)
 
-split_param = 50
+split_param = 100
 
 if __name__ == "__main__":
-    i = 1
-    liste2split(all_data, i)
+    i = 965
+    liste2split(all_data[48200:], i)
 
 
 
