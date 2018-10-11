@@ -7,6 +7,7 @@ Created on Wed Sep 26 14:55:28 2018
 from zipfile import ZipFile
 from os import remove
 import pandas as pd
+import re
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
 import urllib.error, urllib.request
 from rdflib.graph import Graph
@@ -59,13 +60,15 @@ def url_nt2report(url_nt, report, level):
             obj_str = str(obj)
             if (type(obj) is rdflib.term.Literal):
                 obj_str = '"' + obj_str + '"'
+                obj_str = obj_str.replace("\"", "\\\"")
+                obj_str = obj_str.replace("\n", "\\n")
             elif (type(obj) is rdflib.term.URIRef):
                 if ("data.bnf.fr" in obj_str
                     and obj_str not in treated_entities):
                     objects.append(obj_str)
                     treated_entities.append(obj_str)
                 obj_str = "<" + obj_str + ">"
-            report.write(" ".join([subj_str, predicate_str, obj_str]) + "\n")
+            report.write(" ".join([subj_str, predicate_str, obj_str]) + ".\n")
         if (level < 7):
             for object in objects:
                 url_nt_object = uri2url_nt(object)
@@ -80,9 +83,27 @@ def url_nt2report(url_nt, report, level):
     except TimeoutError as err:
         errors.write(url_nt + "\n" + str(err) + "\n\n")
 
+
+def corr_quotes(line):
+    obj = re.sub(r".+> \"(.*\".*)\"\.\n", r"\1", line)
+    if obj == line:
+        return line
+    else:
+        obj = obj.replace('"', '\"')
+        obj = obj.replace('\n', '\\n')
+        line_corr = re.sub(r"(.+)> \"(.*\".*)\"\.\n", r"\1", line) + "> " + obj
+        return line_corr
+    
+
+
+def corrfile(filein, fileout):
+    for line in filein:
+        line = line.replace("\r\n", ".\n")
+    line = corr_quotes(line)
+
 def liste2split(data, i):
     j = 0
-    report_name = f'sampleSPath{str(i)}.nt'
+    report_name = f'sampleSPath{str(i)}-nouv.nt'
     report = open(report_name, "w", encoding="utf-8")
     max = split_param
     if (len(data) < split_param):
@@ -106,8 +127,8 @@ def liste2split(data, i):
 split_param = 100
 
 if __name__ == "__main__":
-    i = 965
-    liste2split(all_data[48200:], i)
+    i = 1930
+    liste2split(all_data[144700:], i)
 
 
 
