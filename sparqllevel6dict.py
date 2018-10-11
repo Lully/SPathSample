@@ -59,8 +59,8 @@ def url_nt2report(url_nt, report, level):
             predicate_str = "<" + str(predicate) + ">"
             obj_str = str(obj)
             if (type(obj) is rdflib.term.Literal):
-                obj_str = '"' + obj_str + '"'
                 obj_str = obj_str.replace("\"", "\\\"")
+                obj_str = '"' + obj_str + '"'
                 obj_str = obj_str.replace("\n", "\\n")
             elif (type(obj) is rdflib.term.URIRef):
                 if ("data.bnf.fr" in obj_str
@@ -85,13 +85,13 @@ def url_nt2report(url_nt, report, level):
 
 
 def corr_quotes(line):
-    obj = re.sub(r".+> \"(.*\".*)\"\.\n", r"\1", line)
+    obj = re.sub('.+> "(.*".*)"\.\n', "\1", line)
     if obj == line:
         return line
     else:
         obj = obj.replace('"', '\"')
-        obj = obj.replace('\n', '\\n')
-        line_corr = re.sub(r"(.+)> \"(.*\".*)\"\.\n", r"\1", line) + "> " + obj
+        obj = obj.replace("\n", "\\n")
+        line_corr = re.sub('(.+)> "(.*".*)"\.\n', "\1", line) + "> " + obj
         return line_corr
     
 
